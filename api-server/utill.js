@@ -118,5 +118,6 @@ function getRepititionCount(alphanumaricsString,searchString){
 }
 module.exports={getMinNumber};
 module.exports={getMaxNumber};
+module.exports={getAvarageNumber};
 module.exports={getSortedNumbers};
 module.exports={getRepititionCount};

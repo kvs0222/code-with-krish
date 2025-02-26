@@ -1,6 +1,7 @@
 const express=require('express');
 const {getMinNumber}=require('./utill.js');
 const {getMaxNumber}=require('./utill.js');
+const {getAvarageNumber}=require('./utill.js');
 const {getSortedNumbers}=require('./utill.js');
 const {getRepititionCount}=require('./utill.js');
 
@@ -26,8 +27,7 @@ app.get('/number/max',(req,res)=>{
 
 app.get('/number/avg',(req,res)=>{
     const numbers = req.query.numbers;
-
-    getMaxNumber(numbers);
+    getAvarageNumber(numbers);
 
 })
 
