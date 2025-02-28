@@ -56,7 +56,7 @@ function getAvarageNumber(numbers){
 
 function getSortedNumbers(queryParam,type){
 
-    const numbers =  queryParam.Split(',').map(Number);
+    const numbers =  queryParam.split(',').map(Number);
 
     for(let i=0;i<numbers.length;i++){
         for(let l=i+1;l<numbers.length;l++){
@@ -116,8 +116,4 @@ function getRepititionCount(alphanumaricsString,searchString){
     }
 
 }
-module.exports={getMinNumber};
-module.exports={getMaxNumber};
-module.exports={getAvarageNumber};
-module.exports={getSortedNumbers};
-module.exports={getRepititionCount};
+module.exports={getMinNumber,getMaxNumber,getAvarageNumber,getSortedNumbers,getRepititionCount};
