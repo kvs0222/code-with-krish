@@ -1,5 +1,5 @@
-import React from "react";
-import createOrder from "../services/order-service";
+import React, { useEffect } from "react";
+import {createOrder,GetOrder} from "../services/order-service";
 
 
 export default function OrderManagement() {
@@ -8,6 +8,7 @@ export default function OrderManagement() {
     const [ProductId, setProductId] = React.useState("");
     const [Price, setPrice] = React.useState("");
     const [Qty, setqty] = React.useState("");
+    const [orders,setOrders]= React.useState([]);
 
     const handleOrderSubmit = async (e) => {
         e.preventDefault();
@@ -27,6 +28,21 @@ export default function OrderManagement() {
        console.log(response.data);
     }
 
+    useEffect(()=> {
+        fetchOrders();
+    },[])
+
+    const fetchOrders = async () =>{
+        try {
+            const response  = await GetOrder();
+            console.log(response.data);
+            setOrders(response.data)
+        } catch (error) {
+            console.error(error)
+            alert(error.name)
+        }
+    }
+
     return (
         <>
 
@@ -43,6 +59,28 @@ export default function OrderManagement() {
 
                 <input type='submit' value='submit'></input>
             </form>
+
+            <div>
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>customer ID</th>
+                        <th>Order Date</th>
+                        <th>ID</th>
+                    </tr>
+                    {
+                        orders && orders.map(item =>
+                           <tr>
+                            <td>{item.id}</td>
+                            <td>{item.CustomerId}</td>
+                            <td>{item.createdAt.split}</td>
+                            <td><button>Edit</button></td>
+                            <td><button>View Item</button></td>
+                           </tr> 
+                            )
+                    }
+                </table>
+            </div>
         </>
     )
 }

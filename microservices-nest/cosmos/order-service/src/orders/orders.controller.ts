@@ -14,7 +14,11 @@ export class OrdersController {
     }
     @Get(":id")
     async fetch(@Param('id')id: number){
-        return await this.orderService.fetch;
+        return await this.orderService.fetch(id);
+    }
+
+    async fetchAll(){
+        return await this.orderService.fetchAll();
     }
 
     @Patch()
