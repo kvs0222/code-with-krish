@@ -8,6 +8,11 @@ export class OrdersController {
 
     constructor(private orderService: OrdersService){}
 
+    /* 
+    * Placing an order 
+    * Method: POST
+    * Return: Order and its items 
+    */
     @Post()
     async create(@Body() createOrderDto:CreateOrderDto): Promise<any>{
         return await this.orderService.create(createOrderDto);
@@ -21,7 +26,7 @@ export class OrdersController {
         return await this.orderService.fetchAll();
     }
 
-    @Patch()
+    @Patch(':id/status')
     async updateOrderStatus(
         @Param('id') id: number,
         @Body() updateOrderStatus: UpdateOrderStatus

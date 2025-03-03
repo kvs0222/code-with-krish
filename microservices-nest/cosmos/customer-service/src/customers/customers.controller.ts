@@ -6,10 +6,11 @@ import { CreateCustomerDto } from './dto/create-customer.dto';
 export class CustomersController {
 
     constructor(private customerService: CustomersService){}
-
+    
     /* 
     * Customer onboading 
-    * 
+    * Method: POST
+    * Return: Customer 
     */
     @Post()
     async create(@Body() createCustomerDto:CreateCustomerDto): Promise<any> {

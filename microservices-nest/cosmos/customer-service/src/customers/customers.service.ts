@@ -26,7 +26,7 @@ export class CustomersService {
   async fetch(id: any) {
 
     const existingCustomer = await this.customerRepository.findOne({
-      where: { id: id },
+      where: { id },
     });
     if (!existingCustomer) {
       throw new BadRequestException(`No Customer found in Id: ${id}`);

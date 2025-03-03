@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductDto } from 'src/dto/create-product.dto';
 import { products } from 'src/entity/products.entity';
@@ -47,7 +47,25 @@ export class ProductsService {
             throw new BadRequestException(`Product id: ${id} stock not available `)
         }
 
-        return exsistingProduct.quantity<quantity?false:true;
+        return exsistingProduct.quantity<=quantity?false:true;
     }
+    async buyProduct(id: number,quantity: number): Promise<products>{
+        const exsistingProduct = await this.productRepository.findOne({
+            where: {
+                id: id,
+            }
+        })
+        if(!exsistingProduct?.quantity){
+            throw new BadRequestException(`Product id: ${id} not available `)
+        }
 
+        const available= exsistingProduct.quantity<=quantity?false:true;
+        
+        if(available){
+            exsistingProduct.quantity=exsistingProduct.quantity-quantity;
+            return await this.productRepository.save(exsistingProduct);
+        }else{
+            throw new NotFoundException(`Product id: ${id} order quantity not available `)
+        }
+    }
 }
