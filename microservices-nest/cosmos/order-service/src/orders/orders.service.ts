@@ -53,6 +53,7 @@ export class OrdersService {
         )
 
         for(const item of items){
+
             this.buyProducts(item.productId,item.quantity);
         }
 
