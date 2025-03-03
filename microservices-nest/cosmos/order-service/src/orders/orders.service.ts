@@ -35,6 +35,7 @@ export class OrdersService {
             if(!isAvailable){
                 throw new NotFoundException(`Product id: ${item.productId} out of stock `);
             }
+
         });
         const order = this.orderRepository.create({
             customerId,
@@ -50,6 +51,10 @@ export class OrdersService {
                 order: saveOrder,
             })
         )
+
+        for(const item of items){
+            this.buyProducts(item.productId,item.quantity);
+        }
 
         await this.orderItemRepository.save(orderItems);
         return this.orderRepository.findOne({
@@ -91,6 +96,12 @@ export class OrdersService {
     async isStockAvailable(productId: number,quantity: number) {
         const baseUrl = `http://localhost:3001/products/${productId}/validate/?quantity=${quantity}`;
         const cutomerResponse = await firstValueFrom(this.httpService.get(baseUrl));
+        return cutomerResponse.data;
+    }
+
+    async buyProducts(productId: number,quantity: number) {
+        const baseUrl = `http://localhost:3001/products/${productId}/reduce/?quantity=${quantity}`;
+        const cutomerResponse = await firstValueFrom(this.httpService.patch(baseUrl));
         return cutomerResponse.data;
     }
 }
