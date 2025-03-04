@@ -31,20 +31,15 @@ export class OrdersService implements OnModuleInit {
     async onModuleInit() {
         await this.producer.connect()
         await this.consumer.connect()
-        await this.consumerConfirmed()
     }
 
-    async create(createOrderDto: CreateOrderDto): Promise<any> { //#todo need to handle null below return
+    async create(createOrderDto: CreateOrderDto): Promise<Order | null> { //#todo need to handle null below return
         const { customerId, items } = createOrderDto;
-        
         const existingCustomer = await this.verifyCustomer(createOrderDto);
         // const isAvailable = await this.isStockAvailable(createOrderDto.);
         if (!existingCustomer) {
             throw new NotFoundException(`Customer id: ${createOrderDto.customerId} not found `);
         }
-        let customerName= existingCustomer.customerName;
-        let city = existingCustomer.city;
-
         items.forEach(async item => {
             const isAvailable = await this.isStockAvailable(item.productId,item.quantity);
             if(!isAvailable){
@@ -52,38 +47,31 @@ export class OrdersService implements OnModuleInit {
             }
 
         });
+        const order = this.orderRepository.create({
+            customerId,
+            status: 'PENDING',
+        });
+        const saveOrder: Order = await this.orderRepository.save(order);
 
-        this.producer.send({
-            topic: `pradeepa-order.create`,
-            messages: [{ value: JSON.stringify({ customerId, customerName,city, items }) }]
-          });
-          return { message: `order is placed , waiting inventory service to process` };
+        const orderItems = items.map((item) =>
+            this.orderItemRepository.create({
+                productId: item.productId,
+                price: item.price,
+                quantity: item.quantity,
+                order: saveOrder,
+            })
+        )
 
-        // const order = this.orderRepository.create({
-        //     customerId,
-        //     status: 'PENDING',
-        // });
-        // const saveOrder: Order = await this.orderRepository.save(order);
+        for(const item of items){
 
-        // const orderItems = items.map((item) =>
-        //     this.orderItemRepository.create({
-        //         productId: item.productId,
-        //         price: item.price,
-        //         quantity: item.quantity,
-        //         order: saveOrder,
-        //     })
-        // )
+            this.buyProducts(item.productId,item.quantity);
+        }
 
-        // for(const item of items){
-
-        //     this.buyProducts(item.productId,item.quantity);
-        // }
-
-        // await this.orderItemRepository.save(orderItems);
-        // return this.orderRepository.findOne({
-        //     where: { id: saveOrder.id },
-        //     relations: ['items'],
-        // });
+        await this.orderItemRepository.save(orderItems);
+        return this.orderRepository.findOne({
+            where: { id: saveOrder.id },
+            relations: ['items'],
+        });
     }
     async fetch(id: any) {
         await this.orderRepository.findOne({
@@ -127,40 +115,4 @@ export class OrdersService implements OnModuleInit {
         const cutomerResponse = await firstValueFrom(this.httpService.patch(baseUrl));
         return cutomerResponse.data;
     }
-
-    async consumerConfirmed() {
-        await this.consumer.subscribe({ topic: 'pradeepa-order.create' });
-    
-        await this.consumer.run({
-          eachMessage: async ({ message }) => {
-            console.log('Order Service .............');
-            const { customerId, customerName,city, items } = JSON.parse(
-              message.value.toString()
-            );
-            const orderCreate = this.orderRepository.create({
-              customerId,
-              city,
-              status: Orderstatus.CONFIRMED,
-            });
-            const savedOrder = await this.orderRepository.save(orderCreate);
-    
-            const orderItems = items.map((item) =>
-              this.orderItemRepository.create({
-                productId: item.productId,
-                price: item.price,
-                quantity: item.quantity,
-                order: savedOrder,
-              }),
-            );
-    
-            await this.orderItemRepository.save(orderItems);
-            this.producer.send({
-              topic: 'pradeepa-order.confirmed',
-              messages: [{value: JSON.stringify(customerId,city)}]
-            });
-          }
-        })
-    
-    
-      }
 }
